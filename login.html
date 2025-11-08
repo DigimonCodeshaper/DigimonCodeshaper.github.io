@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: black;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        color: white;
+        font-family: monospace;
+        position: relative;
+    }
+
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+
+    .center-box {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #000;
+        width: 80vw;
+        max-width: 1080px;
+        height: 100vh;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 8vh;
+        opacity: 0;
+        animation: fadeIn 1.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .center-box img {
+        width: 100vw;
+        max-width: 620px;
+        height: auto;
+        margin-bottom: 0px;
+        margin-top: -120px;
+    }
+
+    .login-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 10px solid rgb(255, 255, 255);
+        padding: 40px 50px;
+        border-radius: 60px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80%;
+        max-width: 600px;
+    }
+
+    .login-box h2 {
+        margin-bottom: 5px;
+        font-size: 2.4rem;
+        text-align: center;
+        letter-spacing: 1px;
+        color: white;
+        text-shadow: 0 0 1px white, 0 0 1px #ffffff, 0 0 1px #ffffff;
+    }
+
+    .input-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 25px;
+    }
+
+    .input-container input {
+        width: 100%;
+        padding: 14px 12px;
+        border: none;
+        border-bottom: 2px solid white;
+        background: transparent;
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        transition: 0.3s ease;
+    }
+
+    .input-container label {
+        position: absolute;
+        top: 14px;
+        left: 12px;
+        color: #aaa;
+        pointer-events: none;
+        transition: 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .input-container input:focus {
+        border-bottom: 2px solid white;
+    }
+
+    .input-container input:focus + label,
+    .input-container input:not(:placeholder-shown) + label {
+        top: -10px;
+        font-size: 0.8rem;
+        color: white;
+    }
+
+    .login-box button {
+        width: 100%;
+        padding: 12px;
+        background-color: white;
+        color: black;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .login-box button:hover {
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .center-box img {
+            width: 60vw;
+            margin-top: -60px;
+        }
+
+        .login-box {
+            width: 90%;
+            padding: 25px 20px;
+            max-width: 320px;
+        }
+    }
+</style>
+</head>
+<body>
+    <canvas id="binaryCanvas"></canvas>
+
+    <div class="center-box" id="mainContent">
+        <img src="logo.png" alt="Logo do Site">
+        <div class="login-box">
+            <h2>Login</h2>
+            
+            <div class="input-container">
+                <input type="text" id="userId" placeholder=" " required>
+                <label for="userId">ID</label>
+            </div>
+
+            <div class="input-container">
+                <input type="password" id="password" placeholder=" " required>
+                <label for="password">Password</label>
+            </div>
+
+            <button id="loginBtn">Entrar</button>
+            <p id="msg" style="margin-top:15px;color:lightgreen;"></p>
+        </div>
+    </div>
+
+    <script>
+        // ---- EFEITO BINÁRIO ----
+        const canvas = document.getElementById('binaryCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const binary = "01";
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
+
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#FFF";
+            ctx.font = fontSize + "px monospace";
+            for (let i = 0; i < drops.length; i++) {
+                const text = binary.charAt(Math.floor(Math.random() * binary.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 50);
+
+        // ---- LOGIN ----
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
+
+            if (!userId || !password) {
+                msg.style.color = "red";
+                msg.textContent = "Preencha todos os campos.";
+                return;
+            }
+
+            try {
+                const res = await fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, password })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    msg.style.color = "lightgreen";
+                    msg.textContent = data.message;
+
+                    // Redireciona para a home (ou outra página)
+                    setTimeout(() => {
+                        window.location.href = "home.html"; 
+                    }, 2000);
+
+                } else {
+                    msg.style.color = "red";
+                    msg.textContent = data.error || "ID ou senha incorretos.";
+                }
+            } catch (err) {
+                msg.style.color = "red";
+                msg.textContent = "Erro de conexão com o servidor.";
+            }
+        });
+    </script>
+</body>
+</html>

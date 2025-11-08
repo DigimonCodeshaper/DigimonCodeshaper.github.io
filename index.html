@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: black;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        color: white;
+        font-family: monospace;
+        position: relative;
+    }
+
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+
+    .center-box {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #000;
+        width: 80vw;
+        max-width: 1080px;
+        height: 100vh;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 8vh;
+        opacity: 0;
+        transition: opacity 1.5s ease;
+    }
+
+    .center-box.visible {
+        opacity: 1;
+    }
+
+    .center-box img {
+        width: 100vw;
+        max-width: 620px;
+        height: auto;
+        margin-bottom: 0px;
+        margin-top: -120px;
+    }
+
+    .login-box {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 10px solid rgb(255, 255, 255);
+        padding: 40px 50px;
+        border-radius: 60px;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80%;
+        max-width: 600px;
+    }
+
+    .login-box h2 {
+        margin-bottom: 5px;
+        font-size: 2.4rem;
+        text-align: center;
+        letter-spacing: 1px;
+        color: white;
+        text-shadow: 0 0 1px white, 0 0 1px #ffffff, 0 0 1px #ffffff;
+    }
+
+    .input-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 25px;
+    }
+
+    .input-container input {
+        width: 100%;
+        padding: 14px 12px;
+        border: none;
+        border-bottom: 2px solid white;
+        background: transparent;
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        transition: 0.3s ease;
+    }
+
+    .input-container label {
+        position: absolute;
+        top: 14px;
+        left: 12px;
+        color: #aaa;
+        pointer-events: none;
+        transition: 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .input-container input:focus {
+        border-bottom: 2px solid white;
+    }
+
+    .input-container input:focus + label,
+    .input-container input:not(:placeholder-shown) + label {
+        top: -10px;
+        font-size: 0.8rem;
+        color: white;
+    }
+
+    .login-box button {
+        width: 100%;
+        padding: 12px;
+        background-color: white;
+        color: black;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .login-box button:hover {
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+    }
+
+    /* --- POPUP --- */
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 1.5s ease;
+    }
+
+    .popup-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .popup-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid white;
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        max-width: 500px;
+        box-shadow: 0 0 20px white;
+        animation: popupFade 0.7s ease;
+    }
+
+    .popup-box h3 {
+        font-size: 1.6rem;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 0 10px white, 0 0 20px cyan;
+    }
+
+    .popup-box p {
+        color: #ddd;
+        font-size: 1rem;
+        margin-bottom: 25px;
+    }
+
+    .popup-box button {
+        background-color: white;
+        color: black;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .popup-box button:hover {
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+    }
+
+    @keyframes popupFade {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .center-box img {
+            width: 60vw;
+            margin-top: -60px;
+        }
+
+        .login-box {
+            width: 90%;
+            padding: 25px 20px;
+            max-width: 320px;
+        }
+
+        .popup-box {
+            width: 80%;
+            padding: 25px;
+        }
+
+        .popup-box h3 {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+</head>
+<body>
+    <canvas id="binaryCanvas"></canvas>
+
+    <!-- POP-UP -->
+    <div id="popup" class="popup-overlay">
+        <div class="popup-box">
+            <h3>Parabéns!</b></h3>
+            <p>Você foi convidado para o teste alfa de <br> <b>Digimon Codeshaper</b></p>
+            <button onclick="fecharPopup()">OK</button>
+        </div>
+    </div>
+
+    <div class="center-box" id="mainContent">
+        <img src="logo.png" alt="Logo do Site">
+        <div class="login-box">
+            <h2>Registro</h2>
+            
+            <div class="input-container">
+                <input type="text" id="userId" placeholder=" " required>
+                <label for="userId">ID</label>
+            </div>
+
+            <div class="input-container">
+                <input type="password" id="password" placeholder=" " required>
+                <label for="password">Password</label>
+            </div>
+
+            <button id="registerBtn">Registrar</button>
+            <p id="msg" style="margin-top:15px;color:lightgreen;"></p>
+        </div>
+    </div>
+
+    <script>
+        // ---- EFEITO BINÁRIO ----
+        const canvas = document.getElementById('binaryCanvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        const binary = "01";
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        const drops = Array(columns).fill(1);
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#FFF";
+            ctx.font = fontSize + "px monospace";
+            for (let i = 0; i < drops.length; i++) {
+                const text = binary.charAt(Math.floor(Math.random() * binary.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 50);
+
+        // ---- POPUP ----
+        function fecharPopup() {
+            const popup = document.getElementById("popup");
+            const mainContent = document.getElementById("mainContent");
+
+            popup.classList.add("hidden");
+            setTimeout(() => {
+                popup.style.display = "none";
+                mainContent.classList.add("visible");
+            }, 1500); // tempo igual ao fade
+        }
+
+        // ---- REGISTRO ----
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('msg');
+
+            if (!userId || !password) {
+                msg.style.color = "red";
+                msg.textContent = "Preencha todos os campos.";
+                return;
+            }
+
+            try {
+                const res = await fetch("http://localhost:3000/registrar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, password })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    msg.style.color = "lightgreen";
+                    msg.textContent = data.message;
+                        setTimeout(() => {
+                    window.location.href = "login.html";
+                    }, 2000);
+                } else {
+                    msg.style.color = "red";
+                    msg.textContent = data.error || "Erro ao registrar.";
+                }
+            } catch (err) {
+                msg.style.color = "red";
+                msg.textContent = "Erro de conexão com o servidor.";
+            }
+        });
+    </script>
+    <!-- ---- MÚSICA DE FUNDO ---- -->
+<audio id="bgMusic" loop>
+    <source src="lobby.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    // Música de fundo
+    const bgMusic = document.getElementById('bgMusic');
+
+    // Inicia só quando o usuário interagir (pra não bloquear autoplay)
+    function startMusic() {
+        bgMusic.volume = 0.4; // volume inicial (0.0 a 1.0)
+        bgMusic.play().catch(() => {
+            console.log("🔇 O navegador bloqueou o autoplay. Esperando interação...");
+        });
+        document.removeEventListener("click", startMusic);
+    }
+
+    // Ouvinte que ativa a música quando o usuário clicar em qualquer lugar
+    document.addEventListener("click", startMusic);
+</script>
+</body>
+</html>
